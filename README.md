@@ -1,82 +1,113 @@
-# aws-lambda serverless API
-The aws-lambda project, created with [`aws-serverless-java-container`](https://github.com/aws/serverless-java-container).
+# Spring Boot with AWS Lambda  
 
-The starter project defines a simple `/ping` resource that can accept `GET` requests with its tests.
+This project demonstrates how to deploy a **Spring Boot** application as an **AWS Lambda** function. It also includes API Gateway configuration to expose the Lambda as a REST API.  
 
-The project folder also includes a `template.yml` file. You can use this [SAM](https://github.com/awslabs/serverless-application-model) file to deploy the project to AWS Lambda and Amazon API Gateway or test in local with the [SAM CLI](https://github.com/awslabs/aws-sam-cli). 
+### 🚀 Features  
 
-## Pre-requisites
-* [AWS CLI](https://aws.amazon.com/cli/)
-* [SAM CLI](https://github.com/awslabs/aws-sam-cli)
-* [Gradle](https://gradle.org/) or [Maven](https://maven.apache.org/)
+- Spring Boot integrated with AWS Lambda  
+- AWS API Gateway configuration  
+- Deployment as a Lambda function in ZIP format  
 
-## Building the project
-You can use the SAM CLI to quickly build the project
-```bash
-$ mvn archetype:generate -DartifactId=aws-lambda -DarchetypeGroupId=com.amazonaws.serverless.archetypes -DarchetypeArtifactId=aws-serverless-jersey-archetype -DarchetypeVersion=2.1.2 -DgroupId=com.helloworld.test -Dversion=1.0-SNAPSHOT -Dinteractive=false
-$ cd aws-lambda
-$ sam build
-Building resource 'AwsLambdaFunction'
-Running JavaGradleWorkflow:GradleBuild
-Running JavaGradleWorkflow:CopyArtifacts
+---
 
-Build Succeeded
+## 🛠 Prerequisites  
 
-Built Artifacts  : .aws-sam/build
-Built Template   : .aws-sam/build/template.yaml
+Before setting up, ensure you have the following installed:  
 
-Commands you can use next
-=========================
-[*] Invoke Function: sam local invoke
-[*] Deploy: sam deploy --guided
-```
+- **Java 21**  
+- **Maven**  
+- **AWS CLI** (Configured with IAM access)  
+- **AWS SAM CLI** (Optional for local testing)  
 
-## Testing locally with the SAM CLI
+---
 
-From the project root folder - where the `template.yml` file is located - start the API with the SAM CLI.
-
-```bash
-$ sam local start-api
-
-...
-Mounting com.amazonaws.serverless.archetypes.StreamLambdaHandler::handleRequest (java11) at http://127.0.0.1:3000/{proxy+} [OPTIONS GET HEAD POST PUT DELETE PATCH]
-...
-```
-
-Using a new shell, you can send a test ping request to your API:
-
-```bash
-$ curl -s http://127.0.0.1:3000/ping | python -m json.tool
-
-{
-    "pong": "Hello, World!"
-}
-``` 
-
-## Deploying to AWS
-To deploy the application in your AWS account, you can use the SAM CLI's guided deployment process and follow the instructions on the screen
+## 📂 Project Structure  
 
 ```
-$ sam deploy --guided
-```
+spring-boot-aws-lambda/
+│── src/main/java/com/example/lambda/
+│   ├── LambdaHandler.java  # Main Lambda handler class
+│   ├── SpringBootLambdaApplication.java  # Main Spring Boot application
+│── src/main/resources/
+│── pom.xml  # Maven dependencies
+│── template.yaml  # AWS SAM Template (Optional)
+│── README.md
+```  
 
-Once the deployment is completed, the SAM CLI will print out the stack's outputs, including the new application URL. You can use `curl` or a web browser to make a call to the URL
+---
 
-```
-...
--------------------------------------------------------------------------------------------------------------
-OutputKey-Description                        OutputValue
--------------------------------------------------------------------------------------------------------------
-AwsLambdaApi - URL for application            https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/pets
--------------------------------------------------------------------------------------------------------------
-```
+## 📌 AWS Lambda Configuration  
 
-Copy the `OutputValue` into a browser or use curl to test your first request:
+### 1️⃣ **Create a Spring Boot AWS Lambda Handler**  
 
-```bash
-$ curl -s https://xxxxxxx.execute-api.us-west-2.amazonaws.com/Prod/ping | python -m json.tool
+In your Spring Boot application, create a Lambda handler that extends `SpringBootRequestHandler`:  
 
-{
-    "pong": "Hello, World!"
+```java
+package com.example.lambda;
+
+import org.springframework.cloud.function.adapter.aws.SpringBootRequestHandler;
+import com.example.lambda.function.MyFunction;
+
+public class LambdaHandler extends SpringBootRequestHandler<String, String> {
 }
 ```
+
+Ensure you have a **Spring Cloud Function** bean that acts as the entry point:  
+
+```java
+@Bean
+public Function<String, String> hello() {
+    return (input) -> "Hello, " + input + " from AWS Lambda!";
+}
+```
+
+---
+
+## 📌 AWS API Gateway Configuration  
+
+To expose the Lambda as a REST API, follow these steps:  
+
+1️⃣ Open **AWS API Gateway**  
+2️⃣ Create a new **HTTP API**  
+3️⃣ Add an integration with your **Lambda function**  
+4️⃣ Configure **routes and methods** (`GET`/`POST`)  
+5️⃣ Deploy the API and get the **Invoke URL**  
+
+---
+
+## 📌 Packaging and Deploying  
+
+### 1️⃣ **Build the Project and Create a ZIP**  
+
+```sh
+mvn clean package
+```
+
+The generated ZIP file will be in `target/`:
+
+```sh
+target/spring-boot-aws-lambda-0.0.1-SNAPSHOT-aws.jar
+```
+
+### 2️⃣ **Upload the ZIP to AWS Lambda**  
+
+```
+   (1) login to your aws account
+   (2) search AWS lambda
+   (3) create new AWS lambda
+   (4) upload your project zip file under the target directory.
+```
+
+---
+
+## 📌 Conclusion  
+
+This project integrates **Spring Boot** with **AWS Lambda** to create a serverless API using **AWS API Gateway**. You can now deploy, manage, and scale your application without managing servers.  
+
+💡 **Feel free to contribute or improve this project!** 🚀  
+
+---
+
+### 📜 License  
+
+This project is licensed under the [MIT License](LICENSE).  
